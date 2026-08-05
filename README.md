@@ -1,4 +1,11 @@
-#uhhh Hi
-**https://valtracker.streamlit.app/**
-links is here
-only for ap region
+## 你好呀~
+## **[點我進網站](https://valtracker.streamlit.app/)**
+### 這是一個用於特戰英豪的中文 tracker
+### 有簡單的 UI 格式 雖然顯示的資料不多
+### 但如果受夠了其他 tracker 網站的話，不妨試看看吧
+* **完全不用登入**
+* 完全無廣告
+* 中文語言
+* 側邊欄可選擇不同地區的tracker
+* 源代碼倉庫內皆可以找到
+
