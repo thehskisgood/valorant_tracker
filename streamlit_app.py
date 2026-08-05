@@ -152,7 +152,8 @@ with st.sidebar:
     st.header("⚙️ 設定")
     
     # 嘗試從 Streamlit Secrets 讀取預設 API Key，如果沒有就留空讓使用者輸入
-    default_api_key = st.secrets.get("HENRIK_API_KEY", "HDEV-01b7f11f-3e3f-4873-88da-9ac5559baf6d")
+    default_api_key = st.secrets.get("HENRIK_API_KEY", "")
+
     
     api_key_input = st.text_input("API Key", value=default_api_key, type="password")
     region_input = st.selectbox("地區 (Region)", ["ap", "na", "eu", "kr", "latam", "br"], index=0)
