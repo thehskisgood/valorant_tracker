@@ -207,10 +207,14 @@ st.title("🎯 Valorant 戰績查詢")
 
 with st.sidebar:
     st.header("⚙️ 設定")
-    # 從 Streamlit Cloud Secrets 後台讀取 Key，不寫死在程式碼中
-    default_api_key = st.secrets.get("HENRIK_API_KEY", "")
-    api_key_input = st.text_input("API Key", value=default_api_key, type="password")
+    # 完全隱藏 API Key，直接從 Streamlit 雲端後台 Secrets 讀取
+    api_key_input = st.secrets.get("HENRIK_API_KEY", "")
+    
+    # 畫面上只留地區選擇器
     region_input = st.selectbox("地區 (Region)", ["ap", "na", "eu", "kr", "latam", "br"], index=0)
+
+    if not api_key_input:
+        st.warning("⚠️ 系統未偵測到 API Key，請確定已至 Streamlit 後台設定 Secrets。")
 
 input_text = st.text_area("輸入 Riot ID（一行一個，格式：名稱#TAG）：", placeholder="Player1#TW1", height=100)
 
