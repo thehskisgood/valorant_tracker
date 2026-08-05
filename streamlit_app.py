@@ -6,6 +6,46 @@ st.set_page_config(page_title="Valorant 戰績查詢", page_icon="🎯", layout=
 
 BASE = "https://api.henrikdev.xyz"
 
+# ====== 中文翻譯對照表 (台服官方譯名) ======
+TIER_TRANSLATION = {
+    "Unranked": "未定位",
+    "Iron 1": "鐵牌 1", "Iron 2": "鐵牌 2", "Iron 3": "鐵牌 3",
+    "Bronze 1": "銅牌 1", "Bronze 2": "銅牌 2", "Bronze 3": "銅牌 3",
+    "Silver 1": "銀牌 1", "Silver 2": "銀牌 2", "Silver 3": "銀牌 3",
+    "Gold 1": "金牌 1", "Gold 2": "金牌 2", "Gold 3": "金牌 3",
+    "Platinum 1": "白金 1", "Platinum 2": "白金 2", "Platinum 3": "白金 3",
+    "Diamond 1": "鑽石 1", "Diamond 2": "鑽石 2", "Diamond 3": "鑽石 3",
+    "Ascendant 1": "超凡入聖 1", "Ascendant 2": "超凡入聖 2", "Ascendant 3": "超凡入聖 3",
+    "Immortal 1": "神話 1", "Immortal 2": "神話 2", "Immortal 3": "神話 3",
+    "Radiant": "輻能戰士"
+}
+
+AGENT_TRANSLATION = {
+    "Jett": "婕提", "Phoenix": "菲尼克斯", "Brimstone": "布史東", "Sage": "聖祈",
+    "Sova": "蘇法", "Raze": "芮茲", "Omen": "歐門", "Viper": "薇蝮",
+    "Cypher": "瑟符", "Killjoy": "愷宙", "Breach": "叛奇", "Skye": "絲凱",
+    "Astra": "亞星卓", "KAY/O": "ＫＡＹ／Ｏ", "Chamber": "錢博爾", "Fade": "菲德",
+    "Yoru": "夜戮", "Neon": "妮虹", "Harbor": "哈泊", "Gekko": "蓋克",
+    "Reyna": "蕾娜", "Deadlock": "蒂羅", "Vyse": "薇絲", "Clove": "珂樂芙",
+    "Iso": "離索", "Tejo": "戴侯", "Miks": "米克什", "Veto": "維托", "Waylay": "維蕾"
+}
+
+MAP_TRANSLATION = {
+    "Ascent": "義境空島",
+    "Bind": "劫境之地",
+    "Haven": "遺落境地",
+    "Split": "雙塔迷城",
+    "Icebox": "極地寒港",
+    "Breeze": "熱帶樂園",
+    "Fracture": "天漠之峽",
+    "Pearl": "深海明珠",
+    "Lotus": "蓮華古城",
+    "Sunset": "日落之城",
+    "Abyss": "深窟幽境",
+    "Corrode": "晶蝕之地",
+    "Summit": "頂峰亭閣"
+}
+
 # ====== API 邏輯函式 ======
 def get_headers(api_key):
     return {"Authorization": api_key}
@@ -30,7 +70,7 @@ def get_matches(name, tag, region, headers, size=5):
 
 def scout(riot_id, region, headers):
     if "#" not in riot_id:
-        st.error(f"格式錯誤：{riot_id}（要是 名稱#TAG）")
+        st.error(f"格式錯誤：{riot_id}（格式要是 名稱#TAG）")
         return
 
     name, tag = riot_id.rsplit("#", 1)
@@ -46,23 +86,30 @@ def scout(riot_id, region, headers):
         st.error(f"發生錯誤 [{riot_id}]：{e}")
         return
 
-    rank = mmr.get("current_data", {}).get("currenttierpatched", "未定位")
+    # 段位翻譯
+    raw_rank = mmr.get("current_data", {}).get("currenttierpatched", "Unranked")
+    rank = TIER_TRANSLATION.get(raw_rank, raw_rank)
     rr = mmr.get("current_data", {}).get("ranking_in_tier", "—")
 
     peak = mmr.get("highest_rank") or mmr.get("peak") or {}
-    peak_name = (
-        peak.get("patched_tier")
-        or (peak.get("tier", {}) or {}).get("name")
-        or "未知"
-    )
+    raw_peak = peak.get("patched_tier") or (peak.get("tier", {}) or {}).get("name") or "Unranked"
+    peak_name = TIER_TRANSLATION.get(raw_peak, raw_peak)
 
-    # 渲染玩家基本資訊卡片
+    # 顯示玩家個人資訊
     st.subheader(f"👤 {account['name']}#{account['tag']} (等級 {account['account_level']})")
     
-    col1, col2, col3 = st.columns(3)
-    col1.metric("目前段位", rank)
-    col2.metric("目前 RR", str(rr))
-    col3.metric("歷史最高段位", peak_name)
+    col_card, col_img = st.columns([3, 1])
+    with col_card:
+        c1, c2, c3 = st.columns(3)
+        c1.metric("目前段位", rank)
+        c2.metric("目前 RR", str(rr))
+        c3.metric("歷史最高", peak_name)
+    
+    # 玩家卡片背景圖 (若 API 有回傳小圖則顯示)
+    card_img = account.get("card", {}).get("small")
+    if card_img:
+        with col_img:
+            st.image(card_img, width=70)
 
     total_kills = total_deaths = total_assists = 0
     total_hs = total_bs = total_ls = 0
@@ -70,20 +117,13 @@ def scout(riot_id, region, headers):
     total_rounds = 0
     match_count = 0
 
-    match_logs = []
+    st.write("### ⚔️ 近期對戰紀錄")
 
     for m in matches:
         players_field = m.get("players", [])
-        if isinstance(players_field, dict):
-            player_list = players_field.get("all_players", [])
-        else:
-            player_list = players_field
+        player_list = players_field.get("all_players", []) if isinstance(players_field, dict) else players_field
 
-        me = None
-        for p in player_list:
-            if p.get("puuid") == account.get("puuid"):
-                me = p
-                break
+        me = next((p for p in player_list if p.get("puuid") == account.get("puuid")), None)
         if not me:
             continue
 
@@ -97,17 +137,37 @@ def scout(riot_id, region, headers):
         damage = (stats.get("damage") or {}).get("dealt", 0) or 0
 
         rounds = len(m.get("rounds", []) or [])
-
         meta = m.get("metadata", {})
-        map_name = meta.get("map", {}).get("name", "?")
-        agent_name = me.get("agent", {}).get("name", "?")
+        
+        # 地圖與特務翻譯
+        raw_map = meta.get("map", {}).get("name", "Unknown")
+        map_zh = MAP_TRANSLATION.get(raw_map, raw_map)
+        
+        agent_obj = me.get("agent", {})
+        raw_agent = agent_obj.get("name", "Unknown")
+        agent_zh = AGENT_TRANSLATION.get(raw_agent, raw_agent)
+        agent_icon = agent_obj.get("images", {}).get("small")
 
-        match_logs.append({
-            "地圖": map_name,
-            "特務": agent_name,
-            "戰績 (K/D/A)": f"{kills} / {deaths} / {assists}",
-            "回合數": rounds
-        })
+        # 渲染單場戰績
+        with st.container():
+            col_icon, col_info, col_kda = st.columns([1, 3, 2])
+            
+            with col_icon:
+                if agent_icon:
+                    st.image(agent_icon, width=45)
+                else:
+                    st.write("🎮")
+
+            with col_info:
+                st.markdown(f"**{map_zh}** (`{raw_map}`)")
+                st.caption(f"使用特務：{agent_zh} ({raw_agent}) | 回合數：{rounds}")
+
+            with col_kda:
+                st.markdown(f"**{kills} / {deaths} / {assists}**")
+                kd = (kills / deaths) if deaths > 0 else kills
+                st.caption(f"K/D: {kd:.2f}")
+
+            st.divider()
 
         total_kills += kills
         total_deaths += deaths
@@ -119,12 +179,7 @@ def scout(riot_id, region, headers):
         total_rounds += rounds
         match_count += 1
 
-    # 顯示近期對戰表格
-    if match_logs:
-        st.write("**近期對戰紀錄：**")
-        st.table(match_logs)
-
-    # 統計數據計算與顯示
+    # 近期表現統計數據
     if match_count > 0:
         avg_k = total_kills / match_count
         avg_d = total_deaths / match_count
@@ -134,47 +189,33 @@ def scout(riot_id, region, headers):
         hs_rate = (total_hs / shot_total * 100) if shot_total > 0 else 0
         adr = (total_damage / total_rounds) if total_rounds > 0 else 0
 
-        st.markdown("#### 綜合表現數據")
+        st.markdown("#### 📊 近期綜合數據")
         m_col1, m_col2, m_col3 = st.columns(3)
         m_col1.metric("平均 KDA", f"{avg_k:.1f}/{avg_d:.1f}/{avg_a:.1f}", f"KD: {kda:.2f}")
         m_col2.metric("爆頭率", f"{hs_rate:.1f}%")
         m_col3.metric("ADR (每回合傷害)", f"{adr:.1f}" if total_rounds > 0 else "無法計算")
     else:
         st.info("沒有可統計的對戰資料")
-    
-    st.divider()
 
 # ====== 網頁 UI 介面 ======
-st.title("🎯 Valorant 戰績快速查詢")
+st.title("🎯 Valorant 戰績查詢")
 
-# 側邊欄：設定 API Key 與 伺服器
 with st.sidebar:
     st.header("⚙️ 設定")
-    
-    # 嘗試從 Streamlit Secrets 讀取預設 API Key，如果沒有就留空讓使用者輸入
+    # 從 Streamlit Cloud Secrets 後台讀取 Key，不寫死在程式碼中
     default_api_key = st.secrets.get("HENRIK_API_KEY", "")
-
-    
     api_key_input = st.text_input("API Key", value=default_api_key, type="password")
     region_input = st.selectbox("地區 (Region)", ["ap", "na", "eu", "kr", "latam", "br"], index=0)
 
-# 主要輸入區
-input_text = st.text_area(
-    "輸入 Riot ID（一行一個，格式：名稱#TAG）：",
-    placeholder="Player1#TW1\nPlayer2#1234",
-    height=120
-)
+input_text = st.text_area("輸入 Riot ID（一行一個，格式：名稱#TAG）：", placeholder="Player1#TW1", height=100)
 
 if st.button("開始查詢", type="primary"):
     if not api_key_input:
-        st.error("請先在側邊欄輸入有效的 API Key！")
+        st.error("請先在側邊欄輸入 API Key 或設定 Streamlit Secrets！")
     elif not input_text.strip():
         st.warning("請先輸入至少一個 Riot ID！")
     else:
         riot_ids = [line.strip() for line in input_text.split("\n") if line.strip()]
-        st.success(f"開始查詢 {len(riot_ids)} 位玩家...")
-        
         headers = get_headers(api_key_input)
-        
         for rid in riot_ids:
             scout(rid, region_input, headers)
