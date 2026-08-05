@@ -8,7 +8,7 @@ BASE = "https://api.henrikdev.xyz"
 
 # ====== 中文翻譯對照表 (台服官方譯名) ======
 TIER_TRANSLATION = {
-    "Unranked": "未定位",
+    "Unrated": "未定位",
     "Iron 1": "鐵牌 1", "Iron 2": "鐵牌 2", "Iron 3": "鐵牌 3",
     "Bronze 1": "銅牌 1", "Bronze 2": "銅牌 2", "Bronze 3": "銅牌 3",
     "Silver 1": "銀牌 1", "Silver 2": "銀牌 2", "Silver 3": "銀牌 3",
@@ -43,7 +43,12 @@ MAP_TRANSLATION = {
     "Sunset": "日落之城",
     "Abyss": "深窟幽境",
     "Corrode": "晶蝕之地",
-    "Summit": "頂峰亭閣"
+    "Summit": "頂峰亭閣",
+    "Skirmish A" : "火線交鋒A"
+    "Skirmish B" : "火線交鋒B"
+    "Skirmish C" : "火線交鋒C"
+    "Skirmish D" : "火線交鋒D"
+    "Skirmish E" : "火線交鋒E"
 }
 
 # ====== API 邏輯函式 ======
