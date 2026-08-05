@@ -17,7 +17,7 @@ TIER_TRANSLATION = {
     "Diamond 1": "鑽石 1", "Diamond 2": "鑽石 2", "Diamond 3": "鑽石 3",
     "Ascendant 1": "超凡入聖 1", "Ascendant 2": "超凡入聖 2", "Ascendant 3": "超凡入聖 3",
     "Immortal 1": "神話 1", "Immortal 2": "神話 2", "Immortal 3": "神話 3",
-    "Radiant": "輻能戰士"
+    "Radiant": "幅能戰魂"
 }
 
 AGENT_TRANSLATION = {
