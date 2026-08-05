@@ -2,7 +2,7 @@ import streamlit as st
 import requests
 
 # ====== 頁面設定 ======
-st.set_page_config(page_title="Valorant 戰績查詢", page_icon="🎯", layout="centered")
+st.set_page_config(page_title="Valorant-戰績查詢", page_icon="🎯", layout="centered")
 
 BASE = "https://api.henrikdev.xyz"
 
