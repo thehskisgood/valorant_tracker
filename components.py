@@ -46,67 +46,149 @@ def player_card(account, lifetime):
         st.image(card, width=250)
 
 
-def match_card(match):
 
-    meta = match["metadata"]
-    stats = match["players"][0]["stats"]
+def find_player(match, puuid):
 
-    map_raw = meta["map"]["name"]
-    mode = meta["queue"]["name"]
+    for p in match.get("players", []):
 
-    player = match["players"][0]
+        if p.get("puuid") == puuid:
+            return p
 
-    agent = player["agent"]["name"]
+    return None
 
-    kills = stats["kills"]
-    deaths = stats["deaths"]
-    assists = stats["assists"]
 
-    with st.expander(
-        f"{map_name(map_raw)} | {agent_name(agent)} | {kills}/{deaths}/{assists}"
-    ):
 
-        st.write(
-            "模式:",
-            mode
-        )
+def match_card(match, puuid):
+
+    meta = match.get("metadata", {})
+
+    player = find_player(
+        match,
+        puuid
+    )
+
+    if not player:
+        return
+
+
+    stats = player.get(
+        "stats",
+        {}
+    )
+
+
+    map_raw = (
+        meta.get("map", {})
+        .get("name", "-")
+    )
+
+    mode = (
+        meta.get("queue", {})
+        .get("name", "-")
+    )
+
+
+    agent_raw = (
+        player.get("agent", {})
+        .get("name", "-")
+    )
+
+
+    kills = stats.get("kills", 0)
+    deaths = stats.get("deaths", 0)
+    assists = stats.get("assists", 0)
+
+
+    title = (
+        f"{map_name(map_raw)} | "
+        f"{agent_name(agent_raw)} | "
+        f"{kills}/{deaths}/{assists}"
+    )
+
+
+    with st.expander(title):
+
+        col1, col2, col3 = st.columns(3)
+
+        with col1:
+            st.metric(
+                "模式",
+                mode
+            )
+
+        with col2:
+            st.metric(
+                "KDA",
+                f"{kills}/{deaths}/{assists}"
+            )
+
+        with col3:
+            st.metric(
+                "Score",
+                stats.get(
+                    "score",
+                    "-"
+                )
+            )
+
 
         st.write(
             "時間:",
-            meta["started_at"]
+            meta.get(
+                "started_at",
+                "-"
+            )
         )
+
 
         st.write(
             "Agent:",
-            agent_name(agent)
+            agent_name(agent_raw)
         )
 
-        st.write(
-            "KDA:",
-            f"{kills}/{deaths}/{assists}"
-        )
 
-        st.write(
-            "Score:",
-            stats["score"]
+        damage = stats.get(
+            "damage",
+            {}
         )
 
         st.write(
             "傷害:",
-            stats["damage"]["dealt"]
+            f"{damage.get('dealt',0)}"
         )
+
 
         st.divider()
 
-        st.write("玩家列表")
+        st.write(
+            "玩家列表"
+        )
 
-        for p in match["players"]:
 
-            s = p["stats"]
+        for p in match.get("players", []):
+
+            s = p.get(
+                "stats",
+                {}
+            )
+
+            agent = (
+                p.get("agent", {})
+                .get("name", "-")
+            )
+
+            tier = (
+                p.get("tier", {})
+                .get("name", "-")
+            )
+
 
             st.write(
-                f"{p['name']}#{p['tag']} | "
-                f"{agent_name(p['agent']['name'])} | "
-                f"{s['kills']}/{s['deaths']}/{s['assists']} | "
-                f"{rank_name(p['tier']['name'])}"
+                f"{p.get('name','-')}#"
+                f"{p.get('tag','-')} | "
+                f"{agent_name(agent)} | "
+                f"{s.get('kills',0)}/"
+                f"{s.get('deaths',0)}/"
+                f"{s.get('assists',0)} | "
+                f"{rank_name(tier)}"
             )
