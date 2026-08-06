@@ -5,13 +5,13 @@ import plotly.express as px
 from api import (
     get_account,
     get_lifetime,
-    get_matches,
-    get_match_detail
+    get_matches
 )
 
-from components import (
-    player_card,
-    match_card
+from translations import (
+    rank_name,
+    agent_name,
+    map_name
 )
 
 
@@ -89,6 +89,7 @@ if st.button("搜尋"):
     st.session_state.matches = matches
 
 
+
 if "account" in st.session_state:
 
 
@@ -97,18 +98,87 @@ if "account" in st.session_state:
     matches = st.session_state.matches
 
 
-    player_card(
-        account,
-        lifetime
+    current = lifetime.get(
+        "current",
+        {}
     )
 
-
-    st.divider()
+    peak = lifetime.get(
+        "peak",
+        {}
+    )
 
 
     st.subheader(
-        "📊 最近表現"
+        f"👤 {account['name']}#{account['tag']}"
     )
+
+
+    c1, c2, c3, c4 = st.columns(4)
+
+
+    c1.metric(
+        "等級",
+        account.get(
+            "account_level",
+            "-"
+        )
+    )
+
+
+    c2.metric(
+        "Rank",
+        rank_name(
+            current.get(
+                "tier",
+                {}
+            ).get(
+                "name",
+                "-"
+            )
+        )
+    )
+
+
+    c3.metric(
+        "RR",
+        current.get(
+            "rr",
+            "-"
+        )
+    )
+
+
+    c4.metric(
+        "最高",
+        rank_name(
+            peak.get(
+                "tier",
+                {}
+            ).get(
+                "name",
+                "-"
+            )
+        )
+    )
+
+
+    card = account.get(
+        "card",
+        {}
+    ).get(
+        "large"
+    )
+
+
+    if card:
+        st.image(
+            card,
+            width=300
+        )
+
+
+    st.divider()
 
 
     total_kills = 0
@@ -119,11 +189,28 @@ if "account" in st.session_state:
     maps = {}
 
 
+    st.subheader(
+        "📊 最近表現"
+    )
+
+
     for match in matches:
 
-        player = match["players"][0]
+        player = next(
+            (
+                p for p in match["players"]
+                if p["puuid"] == account["puuid"]
+            ),
+            None
+        )
+
+
+        if not player:
+            continue
+
 
         stats = player["stats"]
+
 
         total_kills += stats["kills"]
         total_deaths += stats["deaths"]
@@ -137,47 +224,38 @@ if "account" in st.session_state:
         )
 
 
-        map_name = match["metadata"]["map"]["name"]
+        map_raw = match["metadata"]["map"]["name"]
 
-        maps[map_name] = (
-            maps.get(map_name, 0) + 1
+        maps[map_raw] = (
+            maps.get(map_raw, 0) + 1
         )
 
 
-    c1, c2, c3 = st.columns(3)
+    a, b, c = st.columns(3)
 
 
-    with c1:
+    a.metric(
+        "擊殺",
+        total_kills
+    )
 
-        st.metric(
-            "總擊殺",
-            total_kills
-        )
+    b.metric(
+        "死亡",
+        total_deaths
+    )
 
-
-    with c2:
-
-        st.metric(
-            "總死亡",
-            total_deaths
-        )
-
-
-    with c3:
-
-        kd = (
-            total_kills / total_deaths
-            if total_deaths
-            else total_kills
-        )
-
-        st.metric(
-            "K/D",
-            round(kd, 2)
-        )
+    kd = (
+        total_kills / total_deaths
+        if total_deaths
+        else total_kills
+    )
 
 
-    st.divider()
+    c.metric(
+        "K/D",
+        round(kd, 2)
+    )
+
 
 
     if agents:
@@ -187,16 +265,21 @@ if "account" in st.session_state:
         )
 
 
-        df_agent = pd.DataFrame(
+        df = pd.DataFrame(
             {
-                "Agent": list(agents.keys()),
-                "Games": list(agents.values())
+                "Agent": [
+                    agent_name(x)
+                    for x in agents.keys()
+                ],
+                "Games": list(
+                    agents.values()
+                )
             }
         )
 
 
         fig = px.pie(
-            df_agent,
+            df,
             names="Agent",
             values="Games"
         )
@@ -208,6 +291,7 @@ if "account" in st.session_state:
         )
 
 
+
     st.divider()
 
 
@@ -216,20 +300,29 @@ if "account" in st.session_state:
     )
 
 
-    for match in matches:
+    for index, match in enumerate(matches):
 
 
-        match_id = match["metadata"]["match_id"]
+        player = next(
+            (
+                p for p in match["players"]
+                if p["puuid"] == account["puuid"]
+            ),
+            None
+        )
 
 
-        player = match["players"][0]
+        if not player:
+            continue
+
 
         stats = player["stats"]
 
+
         title = (
-            f"{match['metadata']['map']['name']} "
-            f"| {player['agent']['name']} "
-            f"| {stats['kills']}/{stats['deaths']}/{stats['assists']}"
+            f"{map_name(match['metadata']['map']['name'])} | "
+            f"{agent_name(player['agent']['name'])} | "
+            f"{stats['kills']}/{stats['deaths']}/{stats['assists']}"
         )
 
 
@@ -237,50 +330,53 @@ if "account" in st.session_state:
 
 
             st.write(
-                "載入詳細資料..."
+                "模式:",
+                match["metadata"]["queue"]["name"]
             )
 
 
-            try:
+            st.write(
+                "時間:",
+                match["metadata"]["started_at"]
+            )
 
-                detail = get_match_detail(
-                    region,
-                    match_id
+
+            st.write(
+                "Rank:",
+                rank_name(
+                    player["tier"]["name"]
                 )
+            )
+
+
+            st.write(
+                "Damage:",
+                stats["damage"]["dealt"]
+            )
+
+
+            st.write(
+                "爆頭:",
+                stats["headshots"]
+            )
+
+
+            st.divider()
+
+
+            st.write(
+                "👥 玩家列表"
+            )
+
+
+            for p in match["players"]:
+
+                s = p["stats"]
 
 
                 st.write(
-                    "模式:",
-                    detail["metadata"]["queue"]["name"]
-                )
-
-
-                st.write(
-                    "時間:",
-                    detail["metadata"]["started_at"]
-                )
-
-
-                st.write(
-                    "玩家"
-                )
-
-
-                for p in detail["players"]:
-
-                    s = p["stats"]
-
-
-                    st.write(
-                        f"{p['name']}#{p['tag']} | "
-                        f"{p['agent']['name']} | "
-                        f"{s['kills']}/{s['deaths']}/{s['assists']} | "
-                        f"{p['tier']['name']}"
-                    )
-
-
-            except Exception as e:
-
-                st.error(
-                    str(e)
+                    f"{p['name']}#{p['tag']} | "
+                    f"{agent_name(p['agent']['name'])} | "
+                    f"{s['kills']}/{s['deaths']}/{s['assists']} | "
+                    f"{rank_name(p['tier']['name'])}"
                 )
