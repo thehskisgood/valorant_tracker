@@ -53,17 +53,3 @@ def get_matches(name, tag, region, size=20):
     r.raise_for_status()
 
     return r.json()["data"]
-
-
-@st.cache_data(ttl=600)
-def get_match_detail(region, match_id):
-    url = f"{BASE}/valorant/v2/match/{region}/{match_id}"
-
-    r = requests.get(
-        url,
-        headers=headers()
-    )
-
-    r.raise_for_status()
-
-    return r.json()["data"]
