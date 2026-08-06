@@ -50,9 +50,7 @@ if st.button("搜尋"):
         st.error("格式錯誤")
         st.stop()
 
-
     name, tag = riot_id.rsplit("#", 1)
-
 
     try:
 
@@ -74,13 +72,11 @@ if st.button("搜尋"):
             20
         )
 
-
     except Exception as e:
 
         st.error(
             f"API Error: {e}"
         )
-
         st.stop()
 
 
@@ -91,7 +87,6 @@ if st.button("搜尋"):
 
 
 if "account" in st.session_state:
-
 
     account = st.session_state.account
     lifetime = st.session_state.lifetime
@@ -117,50 +112,54 @@ if "account" in st.session_state:
     c1, c2, c3, c4 = st.columns(4)
 
 
-    c1.metric(
-        "等級",
-        account.get(
-            "account_level",
-            "-"
+    with c1:
+        st.metric(
+            "等級",
+            account.get(
+                "account_level",
+                "-"
+            )
         )
-    )
 
 
-    c2.metric(
-        "Rank",
-        rank_name(
+    with c2:
+        st.metric(
+            "目前 Rank",
+            rank_name(
+                current.get(
+                    "tier",
+                    {}
+                ).get(
+                    "name",
+                    "-"
+                )
+            )
+        )
+
+
+    with c3:
+        st.metric(
+            "RR",
             current.get(
-                "tier",
-                {}
-            ).get(
-                "name",
+                "rr",
                 "-"
             )
         )
-    )
 
 
-    c3.metric(
-        "RR",
-        current.get(
-            "rr",
-            "-"
-        )
-    )
-
-
-    c4.metric(
-        "最高",
-        rank_name(
-            peak.get(
-                "tier",
-                {}
-            ).get(
-                "name",
-                "-"
+    with c4:
+        st.metric(
+            "最高 Rank",
+            rank_name(
+                peak.get(
+                    "tier",
+                    {}
+                ).get(
+                    "name",
+                    "-"
+                )
             )
         )
-    )
 
 
     card = account.get(
@@ -186,12 +185,6 @@ if "account" in st.session_state:
     total_assists = 0
 
     agents = {}
-    maps = {}
-
-
-    st.subheader(
-        "📊 最近表現"
-    )
 
 
     for match in matches:
@@ -204,13 +197,11 @@ if "account" in st.session_state:
             None
         )
 
-
         if not player:
             continue
 
 
         stats = player["stats"]
-
 
         total_kills += stats["kills"]
         total_deaths += stats["deaths"]
@@ -224,46 +215,44 @@ if "account" in st.session_state:
         )
 
 
-        map_raw = match["metadata"]["map"]["name"]
-
-        maps[map_raw] = (
-            maps.get(map_raw, 0) + 1
-        )
+    st.subheader(
+        "📊 最近20場統計"
+    )
 
 
     a, b, c = st.columns(3)
 
 
-    a.metric(
-        "擊殺",
-        total_kills
-    )
-
-    b.metric(
-        "死亡",
-        total_deaths
-    )
-
-    kd = (
-        total_kills / total_deaths
-        if total_deaths
-        else total_kills
-    )
+    with a:
+        st.metric(
+            "擊殺",
+            total_kills
+        )
 
 
-    c.metric(
-        "K/D",
-        round(kd, 2)
-    )
+    with b:
+        st.metric(
+            "死亡",
+            total_deaths
+        )
+
+
+    with c:
+
+        kd = (
+            total_kills / total_deaths
+            if total_deaths
+            else total_kills
+        )
+
+        st.metric(
+            "K/D",
+            round(kd, 2)
+        )
 
 
 
     if agents:
-
-        st.subheader(
-            "Agent 使用率"
-        )
-
 
         df = pd.DataFrame(
             {
@@ -271,7 +260,7 @@ if "account" in st.session_state:
                     agent_name(x)
                     for x in agents.keys()
                 ],
-                "Games": list(
+                "場數": list(
                     agents.values()
                 )
             }
@@ -281,7 +270,12 @@ if "account" in st.session_state:
         fig = px.pie(
             df,
             names="Agent",
-            values="Games"
+            values="場數"
+        )
+
+
+        st.subheader(
+            "Agent 使用率"
         )
 
 
@@ -291,16 +285,15 @@ if "account" in st.session_state:
         )
 
 
-
     st.divider()
 
 
     st.subheader(
-        "⚔ 最近20場"
+        "⚔ 最近對戰"
     )
 
 
-    for index, match in enumerate(matches):
+    for match in matches:
 
 
         player = next(
@@ -342,10 +335,24 @@ if "account" in st.session_state:
 
 
             st.write(
-                "Rank:",
-                rank_name(
-                    player["tier"]["name"]
+                "地圖:",
+                map_name(
+                    match["metadata"]["map"]["name"]
                 )
+            )
+
+
+            st.write(
+                "特務:",
+                agent_name(
+                    player["agent"]["name"]
+                )
+            )
+
+
+            st.write(
+                "KDA:",
+                f"{stats['kills']}/{stats['deaths']}/{stats['assists']}"
             )
 
 
@@ -365,14 +372,13 @@ if "account" in st.session_state:
 
 
             st.write(
-                "👥 玩家列表"
+                "👥 全部玩家"
             )
 
 
             for p in match["players"]:
 
                 s = p["stats"]
-
 
                 st.write(
                     f"{p['name']}#{p['tag']} | "
