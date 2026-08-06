@@ -13,16 +13,28 @@ def headers():
 @st.cache_data(ttl=300)
 def get_account(name, tag):
     url = f"{BASE}/valorant/v1/account/{name}/{tag}"
-    r = requests.get(url, headers=headers())
+
+    r = requests.get(
+        url,
+        headers=headers()
+    )
+
     r.raise_for_status()
+
     return r.json()["data"]
 
 
 @st.cache_data(ttl=300)
 def get_lifetime(name, tag, region):
-    url = f"{BASE}/valorant/v1/lifetime/mmr/{region}/{name}/{tag}"
-    r = requests.get(url, headers=headers())
+    url = f"{BASE}/valorant/v3/mmr/{region}/pc/{name}/{tag}"
+
+    r = requests.get(
+        url,
+        headers=headers()
+    )
+
     r.raise_for_status()
+
     return r.json()["data"]
 
 
