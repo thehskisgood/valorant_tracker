@@ -56,7 +56,8 @@ AGENT_TRANSLATION = {
     "Iso": "離索",
     "Tejo": "戴侯",
     "Waylay": "維蕾",
-    "Veto": "維托"
+    "Veto": "維托",
+    "Miks" : "米克什"
 }
 
 
@@ -73,6 +74,11 @@ MAP_TRANSLATION = {
     "Sunset": "日落之城",
     "Abyss": "深窟幽境",
     "Corrode": "晶蝕之地"
+    "Shirmish A" : "火線交鋒A",
+    "Shirmish B" : "火線交鋒B",
+    "Shirmish C" : "火線交鋒C",
+    "Shirmish D" : "火線交鋒D",
+    "Shirmish E" : "火線交鋒E",
 }
 
 
