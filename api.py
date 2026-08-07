@@ -33,6 +33,9 @@ def get_lifetime(name, tag, region):
         headers=headers()
     )
 
+    if r.status_code == 404:
+        return {}
+
     r.raise_for_status()
 
     return r.json()["data"]
