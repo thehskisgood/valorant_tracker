@@ -1,5 +1,5 @@
 ## 你好呀~
-## **[點我進網站](https://valtracker.streamlit.app/)**
+## **[點我進網站](https://valtrack.streamlit.app/)**
 ### 這是一個用於特戰英豪的中文 tracker
 ### 有簡單的 UI 格式 雖然顯示的資料不多
 ### 但如果受夠了其他 tracker 網站的話，不妨試看看吧
