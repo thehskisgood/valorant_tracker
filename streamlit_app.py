@@ -379,11 +379,11 @@ if "account" in st.session_state:
             for p in match["players"]:
 
                 s = p["stats"]
-    tier_name = (p.get('tier') or {}).get('name', '-')
+                tier_name = (p.get('tier') or {}).get('name', '-')
 
                 st.write(
-        f"{p['name']}#{p['tag']} | "
-        f"{agent_name(p['agent']['name'])} | "
-        f"{s['kills']}/{s['deaths']}/{s['assists']} | "
-        f"{rank_name(tier_name)}"
-    )
+                    f"{p['name']}#{p['tag']} | "
+                    f"{agent_name(p['agent']['name'])} | "
+                    f"{s['kills']}/{s['deaths']}/{s['assists']} | "
+                    f"{rank_name(tier_name)}"
+                )
