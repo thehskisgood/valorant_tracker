@@ -11,7 +11,8 @@ from api import (
 from translations import (
     rank_name,
     agent_name,
-    map_name
+    map_name,
+    mode_name
 )
 
 
@@ -336,7 +337,7 @@ if "account" in st.session_state:
 
             st.write(
                 "模式:",
-                match["metadata"]["queue"]["name"]
+                mode_name(match["metadata"]["queue"]["name"])
             )
 
 
@@ -398,6 +399,24 @@ if "account" in st.session_state:
                 else:
                     rank_display = "-"
 
+                kd = (
+                    s['kills'] / s['deaths']
+                    if s['deaths']
+                    else s['kills']
+                )
+
+                total_shots = (
+                    s.get('headshots', 0) +
+                    s.get('bodyshots', 0) +
+                    s.get('legshots', 0)
+                )
+
+                hs_rate = (
+                    round(s.get('headshots', 0) / total_shots * 100, 1)
+                    if total_shots
+                    else 0
+                )
+
                 col1, col2 = st.columns([3, 1])
 
                 with col1:
@@ -405,6 +424,8 @@ if "account" in st.session_state:
                         f"{p['name']}#{p['tag']} | "
                         f"{agent_name(p['agent']['name'])} | "
                         f"{s['kills']}/{s['deaths']}/{s['assists']} | "
+                        f"KD: {round(kd, 2)} | "
+                        f"爆頭率: {hs_rate}% | "
                         f"{rank_display}"
                     )
 
