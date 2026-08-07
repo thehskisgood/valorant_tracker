@@ -381,7 +381,7 @@ if "account" in st.session_state:
                 s = p["stats"]
     tier_name = (p.get('tier') or {}).get('name', '-')
 
-            st.write(
+                st.write(
         f"{p['name']}#{p['tag']} | "
         f"{agent_name(p['agent']['name'])} | "
         f"{s['kills']}/{s['deaths']}/{s['assists']} | "
