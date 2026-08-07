@@ -74,11 +74,11 @@ MAP_TRANSLATION = {
     "Sunset": "日落之城",
     "Abyss": "深窟幽境",
     "Corrode": "晶蝕之地",
-    "Shirmish A" : "火線交鋒A",
-    "Shirmish B" : "火線交鋒B",
-    "Shirmish C" : "火線交鋒C",
-    "Shirmish D" : "火線交鋒D",
-    "Shirmish E" : "火線交鋒E",
+    "Skirmish A" : "火線交鋒A",
+    "Skirmish B" : "火線交鋒B",
+    "Skirmish C" : "火線交鋒C",
+    "Skirmish D" : "火線交鋒D",
+    "Skirmish E" : "火線交鋒E",
 }
 
 
