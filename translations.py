@@ -74,6 +74,7 @@ MAP_TRANSLATION = {
     "Sunset": "日落之城",
     "Abyss": "深窟幽境",
     "Corrode": "晶蝕之地",
+    "Summit" : "頂峰亭閣",
     "Skirmish A" : "火線交鋒A",
     "Skirmish B" : "火線交鋒B",
     "Skirmish C" : "火線交鋒C",
