@@ -225,9 +225,9 @@ if "account" in st.session_state:
 
 
     st.subheader(
-        "📊 最近20場統計"
+        f"📊 最近 {len(matches)} 場統計"
     )
-    st.write(f"載入場數: {len(matches)}")
+
 
     a, b, c = st.columns(3)
 
@@ -302,7 +302,7 @@ if "account" in st.session_state:
     )
 
 
-    for match in matches:
+    for match_idx, match in enumerate(matches):
 
 
         player = next(
@@ -411,7 +411,7 @@ if "account" in st.session_state:
                 with col2:
                     if st.button(
                         "查詢",
-                        key=f"lookup_{match['metadata']['id']}_{p['puuid']}"
+                        key=f"lookup_{match_idx}_{p['puuid']}"
                     ):
                         st.session_state.jump_to = f"{p['name']}#{p['tag']}"
                         st.session_state.auto_search = True
