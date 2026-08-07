@@ -82,6 +82,18 @@ MAP_TRANSLATION = {
 }
 
 
+MODE_TRANSLATION = {
+    "Competitive": "競技競技",
+    "Unrated": "一般模式",
+    "Spike Rush": "幅能搶攻戰",
+    "Deathmatch": "死鬥模式",
+    "Team Deathmatch": "團隊死鬥",
+    "Escalation": "超激進戰",
+    "Replication": "複製亂戰",
+    "Custom Game": "自訂遊戲",
+}
+
+
 def rank_name(rank):
     return RANK_TRANSLATION.get(rank, rank)
 
@@ -92,3 +104,6 @@ def agent_name(agent):
 
 def map_name(map_name):
     return MAP_TRANSLATION.get(map_name, map_name)
+
+def mode_name(mode):
+    return MODE_TRANSLATION.get(mode, mode)
