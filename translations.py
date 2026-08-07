@@ -73,7 +73,7 @@ MAP_TRANSLATION = {
     "Lotus": "蓮華古城",
     "Sunset": "日落之城",
     "Abyss": "深窟幽境",
-    "Corrode": "晶蝕之地"
+    "Corrode": "晶蝕之地",
     "Shirmish A" : "火線交鋒A",
     "Shirmish B" : "火線交鋒B",
     "Shirmish C" : "火線交鋒C",
