@@ -38,13 +38,22 @@ region = st.sidebar.selectbox(
 )
 
 
+if "jump_to" in st.session_state:
+    default_riot_id = st.session_state.pop("jump_to")
+else:
+    default_riot_id = ""
+
+
 riot_id = st.text_input(
     "Riot ID",
+    value=default_riot_id,
     placeholder="name#tag"
 )
 
 
-if st.button("搜尋"):
+auto_search = st.session_state.pop("auto_search", False)
+
+if st.button("搜尋") or auto_search:
 
     if "#" not in riot_id:
         st.error("格式錯誤")
@@ -218,7 +227,7 @@ if "account" in st.session_state:
     st.subheader(
         "📊 最近20場統計"
     )
-
+    st.write(f"載入場數: {len(matches)}")
 
     a, b, c = st.columns(3)
 
@@ -311,6 +320,9 @@ if "account" in st.session_state:
 
         stats = player["stats"]
 
+        is_competitive = (
+            match["metadata"]["queue"].get("id") == "competitive"
+        )
 
         title = (
             f"{map_name(match['metadata']['map']['name'])} | "
@@ -379,11 +391,28 @@ if "account" in st.session_state:
             for p in match["players"]:
 
                 s = p["stats"]
-                tier_name = (p.get('tier') or {}).get('name', '-')
 
-                st.write(
-                    f"{p['name']}#{p['tag']} | "
-                    f"{agent_name(p['agent']['name'])} | "
-                    f"{s['kills']}/{s['deaths']}/{s['assists']} | "
-                    f"{rank_name(tier_name)}"
-                )
+                if is_competitive:
+                    tier_name = (p.get('tier') or {}).get('name', '-')
+                    rank_display = rank_name(tier_name)
+                else:
+                    rank_display = "-"
+
+                col1, col2 = st.columns([3, 1])
+
+                with col1:
+                    st.write(
+                        f"{p['name']}#{p['tag']} | "
+                        f"{agent_name(p['agent']['name'])} | "
+                        f"{s['kills']}/{s['deaths']}/{s['assists']} | "
+                        f"{rank_display}"
+                    )
+
+                with col2:
+                    if st.button(
+                        "查詢",
+                        key=f"lookup_{match['metadata']['id']}_{p['puuid']}"
+                    ):
+                        st.session_state.jump_to = f"{p['name']}#{p['tag']}"
+                        st.session_state.auto_search = True
+                        st.rerun()
